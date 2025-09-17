@@ -46,6 +46,11 @@ public class TcpNetworkServer : IDisposable
     public event EventHandler<(TcpNetworkClient Client, PacketC2S Packet)>? PacketReceived;
 
     /// <summary>
+    /// Event fired when raw data is received from a client
+    /// </summary>
+    public event EventHandler<(TcpNetworkClient Client, byte PacketType, byte[] Data)>? RawDataReceived;
+
+    /// <summary>
     /// Event fired when an error occurs
     /// </summary>
     public event EventHandler<Exception>? Error;
@@ -274,6 +279,11 @@ public class TcpNetworkServer : IDisposable
         client.PacketReceived += (sender, packet) =>
         {
             PacketReceived?.Invoke(this, (client, packet));
+        };
+
+        client.RawDataReceived += (sender, rawData) =>
+        {
+            RawDataReceived?.Invoke(this, (client, rawData.PacketType, rawData.Data));
         };
     }
 

@@ -20,6 +20,11 @@ public abstract class NetworkClient
     public event EventHandler<PacketC2S>? PacketReceived;
 
     /// <summary>
+    /// Event fired when raw data is received from the client
+    /// </summary>
+    public event EventHandler<(byte PacketType, byte[] Data)>? RawDataReceived;
+
+    /// <summary>
     /// Event fired when the client subscribes (sets intent to Subscribe)
     /// </summary>
     public event EventHandler? Subscribed;
@@ -77,6 +82,9 @@ public abstract class NetworkClient
     /// <param name="data">The raw packet data</param>
     protected void HandlePacket(byte packetType, byte[] data)
     {
+        // Fire raw data event first
+        RawDataReceived?.Invoke(this, (packetType, data));
+        
         var packet = PacketFactory.CreatePacket(packetType, data);
 
         if (packet != null)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -19,12 +18,13 @@ public class EnhancedRNetService : IRNetService, IDisposable
 {
     private readonly ILogger<EnhancedRNetService> _logger;
     private readonly IConfigurationService _configService;
+    private readonly ISerialPortFactory _serialPortFactory;
     private readonly ConcurrentDictionary<(int controllerID, int zoneID), Zone> _zones;
     private readonly ConcurrentDictionary<int, Source> _sources;
     private readonly Queue<RNetPacket> _packetQueue = new();
     private readonly object _packetQueueLock = new();
     
-    private SerialPort? _serialPort;
+    private ISerialPort? _serialPort;
     private bool _connected = false;
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _processingTask;
@@ -45,10 +45,11 @@ public class EnhancedRNetService : IRNetService, IDisposable
     public event EventHandler<KeypadEventPacket>? KeypadEvent;
     public event EventHandler<string>? DisplayMessage;
 
-    public EnhancedRNetService(ILogger<EnhancedRNetService> logger, IConfigurationService configService)
+    public EnhancedRNetService(ILogger<EnhancedRNetService> logger, IConfigurationService configService, ISerialPortFactory? serialPortFactory = null)
     {
         _logger = logger;
         _configService = configService;
+        _serialPortFactory = serialPortFactory ?? new SerialPortFactory();
         _zones = new ConcurrentDictionary<(int, int), Zone>();
         _sources = new ConcurrentDictionary<int, Source>();
 
@@ -70,7 +71,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
             var device = _configService.Configuration.SerialDevice ?? "/dev/ttyUSB0";
             _logger.LogInformation("Connecting to RNet device: {Device}", device);
             
-            var ports = SerialPort.GetPortNames();
+            var ports = System.IO.Ports.SerialPort.GetPortNames();
             if (!ports.Contains(device))
             {
                 _logger.LogError("Serial device {Device} not found. Available ports: {Ports}", device, string.Join(", ", ports));
@@ -78,13 +79,10 @@ public class EnhancedRNetService : IRNetService, IDisposable
             }
             else
             {
-                _serialPort = new SerialPort(device, 19200)
-                {
-                    DataBits = 8,
-                    Parity = Parity.None,
-                    StopBits = StopBits.One,
-                    Handshake = Handshake.None
-                };
+                _serialPort = _serialPortFactory.CreateSerialPort(device, 19200);
+                _serialPort.DataBits = 8;
+                _serialPort.Parity = System.IO.Ports.Parity.None;
+                _serialPort.StopBits = System.IO.Ports.StopBits.One;
                 _serialPort.DataReceived += OnDataReceived;
                 _serialPort.ErrorReceived += OnErrorReceived;
                 _serialPort.Open();
@@ -99,7 +97,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
             Connected?.Invoke(this, EventArgs.Empty);
 
             // Send initial handshake if needed
-            await SendHandshakeAsync();
+            SendHandshake();
 
             return true;
         }
@@ -375,14 +373,14 @@ public class EnhancedRNetService : IRNetService, IDisposable
         }
     }
 
-    private async Task SendHandshakeAsync()
+    private void SendHandshake()
     {
         if (!_connected) return;
 
         try
         {
             var handshakePacket = new HandshakePacket(0x00, 0x01);
-            await SendPacketAsync(handshakePacket);
+            SendPacket(handshakePacket);
             _logger.LogDebug("Sent handshake packet");
         }
         catch (Exception ex)
@@ -392,7 +390,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
         }
     }
 
-    private async Task SendPacketAsync(RNetPacket packet)
+    private void SendPacket(RNetPacket packet)
     {
         if (!_connected) return;
 
@@ -401,8 +399,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
             var buffer = packet.GetBuffer();
             if (_serialPort != null)
             {
-                await _serialPort.BaseStream.WriteAsync(buffer, 0, buffer.Length);
-                await _serialPort.BaseStream.FlushAsync();
+                _serialPort.Write(buffer);
             }
             
             _logger.LogSentPacket(packet.GetType().Name, buffer, $"to RNet ({buffer.Length} bytes)");
@@ -431,7 +428,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
 
                 if (packet != null)
                 {
-                    await SendPacketAsync(packet);
+                    SendPacket(packet);
                 }
 
                 await Task.Delay(10, cancellationToken); // Small delay to prevent tight loop
@@ -448,20 +445,12 @@ public class EnhancedRNetService : IRNetService, IDisposable
         }
     }
 
-    private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
+    private void OnDataReceived(object? sender, byte[] data)
     {
-        if (_serialPort == null) return;
-
         try
         {
-            var bytesToRead = _serialPort.BytesToRead;
-            if (bytesToRead == 0) return;
-
-            var buffer = new byte[bytesToRead];
-            _serialPort.Read(buffer, 0, bytesToRead);
-
             // Process received data - this would need packet parsing logic
-            ProcessReceivedData(buffer);
+            ProcessReceivedData(data);
         }
         catch (Exception ex)
         {
@@ -607,10 +596,10 @@ public class EnhancedRNetService : IRNetService, IDisposable
         _logger.LogDebug("Received handshake response");
     }
 
-    private void OnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+    private void OnErrorReceived(object? sender, Exception error)
     {
-        _logger.LogError("Serial port error: {Error}", e.EventType);
-        Error?.Invoke(this, new Exception($"Serial port error: {e.EventType}"));
+        _logger.LogError(error, "Serial port error: {Error}", error.Message);
+        Error?.Invoke(this, error);
     }
 
     private void LoadConfiguration()
