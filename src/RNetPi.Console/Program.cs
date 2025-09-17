@@ -21,7 +21,7 @@ public class Program
             {
                 // Register services
                 services.AddSingleton<IConfigurationService, ConfigurationService>();
-                services.AddSingleton<IRNetService, EnhancedRNetService>();
+                services.AddSingleton<IRNetService, RNetService>();
                 services.AddSingleton<RNetApplication>();
             })
             .ConfigureLogging(logging =>

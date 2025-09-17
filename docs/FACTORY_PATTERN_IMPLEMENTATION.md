@@ -25,18 +25,18 @@ This implementation provides a factory pattern that allows selecting between "re
 ### Production Code (Real Implementations)
 ```csharp
 // Default usage - automatically uses real implementations
-var service = new EnhancedRNetService(logger, configService);
+var service = new RNetService(logger, configService);
 
 // Explicit usage with real factory
 var realFactory = new SerialPortFactory();
-var service = new EnhancedRNetService(logger, configService, realFactory);
+var service = new RNetService(logger, configService, realFactory);
 ```
 
 ### Test Code (Mock Implementations)
 ```csharp
 // Using mock factory for testing
 var mockFactory = new MockSerialPortFactory();
-var service = new EnhancedRNetService(logger, configService, mockFactory);
+var service = new RNetService(logger, configService, mockFactory);
 
 // Test serial communication
 await service.ConnectAsync();
@@ -73,7 +73,7 @@ Assert.Single(clientData);
 
 ## Integration with Existing Code
 
-Both `EnhancedRNetService` and `RNetService` (in Infrastructure) have been updated to support factory injection:
+The `RNetService` has been updated to support factory injection:
 
 - Default constructors maintain backward compatibility
 - Optional factory parameters allow test code to inject mock implementations

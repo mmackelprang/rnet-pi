@@ -68,7 +68,7 @@ builder.Services.AddSwaggerGen(c =>
 // Add RNetPi services
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IUpdateService, UpdateService>();
-builder.Services.AddSingleton<IRNetService, EnhancedRNetService>();
+builder.Services.AddSingleton<IRNetService, RNetService>();
 
 var app = builder.Build();
 

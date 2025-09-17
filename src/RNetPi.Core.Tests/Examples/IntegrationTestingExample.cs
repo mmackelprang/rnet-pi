@@ -16,7 +16,7 @@ public class IntegrationTestingExample
     public async Task Example_EnhancedIntegrationTesting_WithMockFactories()
     {
         // Arrange: Set up mock dependencies
-        var mockLogger = new Mock<ILogger<EnhancedRNetService>>();
+        var mockLogger = new Mock<ILogger<RNetService>>();
         var mockConfigService = new Mock<IConfigurationService>();
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration 
         { 
@@ -29,7 +29,7 @@ public class IntegrationTestingExample
         var mockNetworkFactory = new MockNetworkPortFactory();
 
         // Create service with mock factories
-        var service = new EnhancedRNetService(mockLogger.Object, mockConfigService.Object, mockSerialFactory);
+        var service = new RNetService(mockLogger.Object, mockConfigService.Object, mockSerialFactory);
 
         // Act & Assert: Test connection with simulation mode
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration { Simulate = true });
