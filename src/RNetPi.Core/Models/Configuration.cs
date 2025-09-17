@@ -7,7 +7,7 @@ public class Configuration
     public int ServerPort { get; set; } = 3000;
     public string? WebHost { get; set; }
     public int? WebPort { get; set; }
-    public string SerialDevice { get; set; } = "/dev/tty-usbserial1";
+    public string SerialDevice { get; set; } = "/dev/ttyUSB0";
     public string WebHookPassword { get; set; } = string.Empty;
     public bool Simulate { get; set; } = false;
 }

@@ -202,12 +202,12 @@ public class RNetApplication
             System.Console.WriteLine($"  Set source to 1 - Current source: {livingRoom.Source}, Previous: {s}");
             
             // Test parameters
-            var b = livingRoom.GetParameter((int)Zone.Parameter.Bass);
-            var t = livingRoom.GetParameter((int)Zone.Parameter.Treble);
-            livingRoom.SetParameter((int)Zone.Parameter.Bass, 5); // Bass
-            livingRoom.SetParameter((int)Zone.Parameter.Treble, -2); // Treble
+            var b = livingRoom.Bass;
+            var t = livingRoom.Treble;
+            livingRoom.Bass = 5; // Bass
+            livingRoom.Treble = -2; // Treble
             System.Console.WriteLine($"  Set bass to 5, treble to -2");
-            System.Console.WriteLine($"  Bass: {livingRoom.GetParameter((int)Zone.Parameter.Bass)}, Previous {b}, Treble: {livingRoom.GetParameter((int)Zone.Parameter.Treble)}, Previous {t}");
+            System.Console.WriteLine($"  Bass: {livingRoom.Bass}, Previous {b}, Treble: {livingRoom.Treble}, Previous {t}");
         }
 
         // Test global functions

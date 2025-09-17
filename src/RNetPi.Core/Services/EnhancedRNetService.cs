@@ -69,19 +69,26 @@ public class EnhancedRNetService : IRNetService, IDisposable
 
             var device = _configService.Configuration.SerialDevice ?? "/dev/ttyUSB0";
             _logger.LogInformation("Connecting to RNet device: {Device}", device);
-
-            _serialPort = new SerialPort(device, 19200)
+            
+            var ports = SerialPort.GetPortNames();
+            if (!ports.Contains(device))
             {
-                DataBits = 8,
-                Parity = Parity.None,
-                StopBits = StopBits.One,
-                Handshake = Handshake.None
-            };
-
-            _serialPort.DataReceived += OnDataReceived;
-            _serialPort.ErrorReceived += OnErrorReceived;
-
-            _serialPort.Open();
+                _logger.LogError("Serial device {Device} not found. Available ports: {Ports}", device, string.Join(", ", ports));
+                _serialPort = null;
+            }
+            else
+            {
+                _serialPort = new SerialPort(device, 19200)
+                {
+                    DataBits = 8,
+                    Parity = Parity.None,
+                    StopBits = StopBits.One,
+                    Handshake = Handshake.None
+                };
+                _serialPort.DataReceived += OnDataReceived;
+                _serialPort.ErrorReceived += OnErrorReceived;
+                _serialPort.Open();
+            }
             _connected = true;
 
             // Start processing task
@@ -387,13 +394,16 @@ public class EnhancedRNetService : IRNetService, IDisposable
 
     private async Task SendPacketAsync(RNetPacket packet)
     {
-        if (!_connected || _serialPort == null) return;
+        if (!_connected) return;
 
         try
         {
             var buffer = packet.GetBuffer();
-            await _serialPort.BaseStream.WriteAsync(buffer, 0, buffer.Length);
-            await _serialPort.BaseStream.FlushAsync();
+            if (_serialPort != null)
+            {
+                await _serialPort.BaseStream.WriteAsync(buffer, 0, buffer.Length);
+                await _serialPort.BaseStream.FlushAsync();
+            }
             
             _logger.LogSentPacket(packet.GetType().Name, buffer, $"to RNet ({buffer.Length} bytes)");
         }
@@ -521,16 +531,26 @@ public class EnhancedRNetService : IRNetService, IDisposable
         var zone = GetZone(controllerID, zoneID);
         if (zone != null)
         {
+            _logger.LogDebug("Prior Zone State: {ZoneInfo}", GetZoneInfo(zone));
             zone.SetPower(packet.GetPower());
             zone.SetVolume(packet.GetVolume());
             zone.SetSource(packet.GetSourceID());
-            zone.SetParameter(0, packet.GetBassLevel() + 10); // Bass
-            zone.SetParameter(1, packet.GetTrebleLevel() + 10); // Treble
-            zone.SetParameter(2, packet.GetLoudness()); // Loudness
-            zone.SetParameter(3, packet.GetBalance() + 10); // Balance
-            zone.SetParameter(7, packet.GetPartyMode()); // Party Mode
-            zone.SetParameter(6, packet.GetDoNotDisturbMode() != 0); // Do Not Disturb
+            zone.Bass = packet.GetBassLevel() + 10;                // Bass
+            zone.Treble = packet.GetTrebleLevel() + 10;            // Treble
+            zone.Loudness = packet.GetLoudness();                  // Loudness
+            zone.Balance = packet.GetBalance() + 10;               // Balance
+            zone.PartyMode = packet.GetPartyMode();                // Party Mode
+            zone.DoNotDisturb = packet.GetDoNotDisturbMode() != 0; // Do Not Disturb
+            _logger.LogDebug("Final Zone State: {ZoneInfo}", GetZoneInfo(zone));
         }
+        else
+            _logger.LogInformation("Can't Find Zone - ControllerID: {controllerID}, ZoneID: {zoneID}", controllerID, zoneID);
+    }
+
+    private string? GetZoneInfo(Zone zone)
+    {
+        return string.Format("Power: {zone.Power}, Volume: {zone.Volume}, Source: {zone.Source}, Bass: {zone.Bass}, Treble: {zone.Treble}, Loudness: {zone.Loudness}, Balance: {zone.Balance}, PartyMode: {zone.PartyMode}, DnD: {zone.DoNotDisturb}",
+                              zone.Power, zone.Volume, zone.Source, zone.Bass, zone.Treble, zone.Loudness, zone.Balance, zone.PartyMode, zone.DoNotDisturb);
     }
 
     private void HandleZonePowerPacket(ZonePowerPacket packet)
