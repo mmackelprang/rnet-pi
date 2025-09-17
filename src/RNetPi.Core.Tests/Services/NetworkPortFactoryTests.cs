@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using RNetPi.Core.Interfaces;
 using RNetPi.Core.Services;
 using Xunit;
@@ -6,6 +7,22 @@ namespace RNetPi.Core.Tests.Services;
 
 public class NetworkPortFactoryTests
 {
+    [Fact]
+    public void NetworkPortFactory_CreateNetworkPort_ReturnsTcpNetworkPortAdapter()
+    {
+        // Arrange
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        var factory = new NetworkPortFactory(loggerFactory, "Test Server", "127.0.0.1");
+
+        // Act
+        var networkPort = factory.CreateNetworkPort();
+
+        // Assert
+        Assert.NotNull(networkPort);
+        Assert.IsType<TcpNetworkPortAdapter>(networkPort);
+        Assert.False(networkPort.IsConnected);
+    }
+
     [Fact]
     public void MockNetworkPortFactory_CreateNetworkPort_ReturnsTestableNetworkPort()
     {
