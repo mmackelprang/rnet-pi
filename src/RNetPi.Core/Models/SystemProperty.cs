@@ -1,4 +1,4 @@
-﻿namespace RNetPi.Core.Models;
+namespace RNetPi.Core.Models;
 
 public enum SystemProperty
 {

@@ -7,18 +7,18 @@ using Xunit;
 
 namespace RNetPi.Core.Tests.Services;
 
-public class EnhancedRNetServiceIntegrationTests
+public class RNetServiceIntegrationTests
 {
     [Fact]
-    public void EnhancedRNetService_CanUseDefaultSerialPortFactory()
+    public void RNetService_CanUseDefaultSerialPortFactory()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<EnhancedRNetService>>();
+        var mockLogger = new Mock<ILogger<RNetService>>();
         var mockConfigService = new Mock<IConfigurationService>();
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration { Simulate = true });
 
         // Act - Using default factory (should be SerialPortFactory)
-        var service = new EnhancedRNetService(mockLogger.Object, mockConfigService.Object);
+        var service = new RNetService(mockLogger.Object, mockConfigService.Object);
 
         // Assert
         Assert.NotNull(service);
@@ -26,17 +26,17 @@ public class EnhancedRNetServiceIntegrationTests
     }
 
     [Fact]
-    public void EnhancedRNetService_CanUseMockSerialPortFactory()
+    public void RNetService_CanUseMockSerialPortFactory()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<EnhancedRNetService>>();
+        var mockLogger = new Mock<ILogger<RNetService>>();
         var mockConfigService = new Mock<IConfigurationService>();
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration { Simulate = true });
         
         var mockFactory = new MockSerialPortFactory();
 
         // Act - Using mock factory
-        var service = new EnhancedRNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
+        var service = new RNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
 
         // Assert
         Assert.NotNull(service);
@@ -44,15 +44,15 @@ public class EnhancedRNetServiceIntegrationTests
     }
 
     [Fact]
-    public async Task EnhancedRNetService_WithMockFactory_ConnectsInSimulationMode()
+    public async Task RNetService_WithMockFactory_ConnectsInSimulationMode()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<EnhancedRNetService>>();
+        var mockLogger = new Mock<ILogger<RNetService>>();
         var mockConfigService = new Mock<IConfigurationService>();
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration { Simulate = true });
         
         var mockFactory = new MockSerialPortFactory();
-        var service = new EnhancedRNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
+        var service = new RNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
 
         // Act
         var result = await service.ConnectAsync();
@@ -63,10 +63,10 @@ public class EnhancedRNetServiceIntegrationTests
     }
 
     [Fact]
-    public async Task EnhancedRNetService_WithMockFactory_CanCreateTestablePort()
+    public async Task RNetService_WithMockFactory_CanCreateTestablePort()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<EnhancedRNetService>>();
+        var mockLogger = new Mock<ILogger<RNetService>>();
         var mockConfigService = new Mock<IConfigurationService>();
         mockConfigService.Setup(x => x.Configuration).Returns(new Configuration 
         { 
@@ -75,7 +75,7 @@ public class EnhancedRNetServiceIntegrationTests
         });
         
         var mockFactory = new MockSerialPortFactory();
-        var service = new EnhancedRNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
+        var service = new RNetService(mockLogger.Object, mockConfigService.Object, mockFactory);
 
         // Act - This should use the mock factory to create a TestableSerialPort
         // Note: In real test scenarios, we might need to mock SerialPort.GetPortNames() as well

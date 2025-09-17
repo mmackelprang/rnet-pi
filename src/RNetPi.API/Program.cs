@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using RNetPi.Core.Interfaces;
 using RNetPi.Infrastructure.Services;
+using RNetPi.Core.Services;
 using RNetPi.Core.Logging;
 using System.Reflection;
 
@@ -67,7 +68,7 @@ builder.Services.AddSwaggerGen(c =>
 // Add RNetPi services
 builder.Services.AddSingleton<IConfigurationService, ConfigurationService>();
 builder.Services.AddSingleton<IUpdateService, UpdateService>();
-// Note: IRNetController implementation would be added here when available
+builder.Services.AddSingleton<IRNetService, RNetService>();
 
 var app = builder.Build();
 

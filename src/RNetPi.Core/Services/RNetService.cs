@@ -12,11 +12,11 @@ using RNetPi.Core.Logging;
 namespace RNetPi.Core.Services;
 
 /// <summary>
-/// Enhanced RNet service implementation using the ported packet infrastructure
+/// RNet service implementation using the ported packet infrastructure
 /// </summary>
-public class EnhancedRNetService : IRNetService, IDisposable
+public class RNetService : IRNetService, IDisposable
 {
-    private readonly ILogger<EnhancedRNetService> _logger;
+    private readonly ILogger<RNetService> _logger;
     private readonly IConfigurationService _configService;
     private readonly ISerialPortFactory _serialPortFactory;
     private readonly ConcurrentDictionary<(int controllerID, int zoneID), Zone> _zones;
@@ -45,7 +45,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
     public event EventHandler<KeypadEventPacket>? KeypadEvent;
     public event EventHandler<string>? DisplayMessage;
 
-    public EnhancedRNetService(ILogger<EnhancedRNetService> logger, IConfigurationService configService, ISerialPortFactory? serialPortFactory = null)
+    public RNetService(ILogger<RNetService> logger, IConfigurationService configService, ISerialPortFactory? serialPortFactory = null)
     {
         _logger = logger;
         _configService = configService;
@@ -253,7 +253,7 @@ public class EnhancedRNetService : IRNetService, IDisposable
         }
     }
 
-    // Enhanced functionality methods
+    // Advanced functionality methods
     public void SetZonePower(int controllerID, int zoneID, bool power)
     {
         try
