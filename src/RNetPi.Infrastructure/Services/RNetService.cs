@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.IO.Ports;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,9 +11,10 @@ public class RNetService : IRNetService, IDisposable
 {
     private readonly ILogger<RNetService> _logger;
     private readonly IConfigurationService _configService;
+    private readonly ISerialPortFactory _serialPortFactory;
     private readonly ConcurrentDictionary<(int controllerID, int zoneID), Zone> _zones;
     private readonly ConcurrentDictionary<int, Source> _sources;
-    private SerialPort? _serialPort;
+    private ISerialPort? _serialPort;
     private bool _connected = false;
     private readonly Queue<byte[]> _packetQueue = new();
     private readonly string _zonesFilePath;
@@ -28,10 +28,11 @@ public class RNetService : IRNetService, IDisposable
     public event EventHandler? Disconnected; 
     public event EventHandler<Exception>? Error;
 
-    public RNetService(ILogger<RNetService> logger, IConfigurationService configService)
+    public RNetService(ILogger<RNetService> logger, IConfigurationService configService, ISerialPortFactory? serialPortFactory = null)
     {
         _logger = logger;
         _configService = configService;
+        _serialPortFactory = serialPortFactory ?? new RNetPi.Core.Services.SerialPortFactory();
         _zones = new ConcurrentDictionary<(int, int), Zone>();
         _sources = new ConcurrentDictionary<int, Source>();
         
@@ -57,7 +58,7 @@ public class RNetService : IRNetService, IDisposable
             var devicePath = _configService.Configuration.SerialDevice;
             _logger.LogInformation("Connecting to RNet on device: {Device}", devicePath);
 
-            var ports = SerialPort.GetPortNames();
+            var ports = System.IO.Ports.SerialPort.GetPortNames();
             if (!ports.Contains(devicePath))
             {
                 _logger.LogError("Serial device {Device} not found. Available ports: {Ports}", devicePath, string.Join(", ", ports));
@@ -65,13 +66,10 @@ public class RNetService : IRNetService, IDisposable
             }
             else
             {
-                _serialPort = new SerialPort(devicePath, 19200)
-                {
-                    DataBits = 8,
-                    Parity = Parity.None,
-                    StopBits = StopBits.One,
-                    Handshake = Handshake.None
-                };
+                _serialPort = _serialPortFactory.CreateSerialPort(devicePath, 19200);
+                _serialPort.DataBits = 8;
+                _serialPort.Parity = System.IO.Ports.Parity.None;
+                _serialPort.StopBits = System.IO.Ports.StopBits.One;
                 _serialPort.DataReceived += OnDataReceived;
                 _serialPort.ErrorReceived += OnErrorReceived;
                 _serialPort.Open();
@@ -216,18 +214,12 @@ public class RNetService : IRNetService, IDisposable
         await Task.CompletedTask;
     }
 
-    private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
-    {
-        if (_serialPort == null) return;
-        
+    private void OnDataReceived(object? sender, byte[] data)
+    {        
         try
         {
-            int bytesToRead = _serialPort.BytesToRead;
-            byte[] buffer = new byte[bytesToRead];
-            _serialPort.Read(buffer, 0, bytesToRead);
-            
             // TODO: Implement packet parsing and handling
-            _logger.LogTrace("Received {ByteCount} bytes from RNet", bytesToRead);
+            _logger.LogTrace("Received {ByteCount} bytes from RNet", data.Length);
         }
         catch (Exception ex)
         {
@@ -236,11 +228,10 @@ public class RNetService : IRNetService, IDisposable
         }
     }
 
-    private void OnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+    private void OnErrorReceived(object? sender, Exception error)
     {
-        _logger.LogError("Serial port error: {Error}", e.EventType);
-        var exception = new InvalidOperationException($"Serial port error: {e.EventType}");
-        Error?.Invoke(this, exception);
+        _logger.LogError(error, "Serial port error: {Error}", error.Message);
+        Error?.Invoke(this, error);
     }
 
     private async Task LoadPersistedDataAsync()
