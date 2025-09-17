@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RNetPi.Core.Interfaces;
 using RNetPi.Infrastructure.Services;
+using RNetPi.Core.Services;
 using RNetPi.Core.Models;
 using RNetPi.Core.Logging;
 
@@ -20,7 +21,7 @@ public class Program
             {
                 // Register services
                 services.AddSingleton<IConfigurationService, ConfigurationService>();
-                services.AddSingleton<IRNetService, RNetService>();
+                services.AddSingleton<IRNetService, EnhancedRNetService>();
                 services.AddSingleton<RNetApplication>();
             })
             .ConfigureLogging(logging =>
