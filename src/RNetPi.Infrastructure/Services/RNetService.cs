@@ -57,11 +57,25 @@ public class RNetService : IRNetService, IDisposable
             var devicePath = _configService.Configuration.SerialDevice;
             _logger.LogInformation("Connecting to RNet on device: {Device}", devicePath);
 
-            _serialPort = new SerialPort(devicePath, 19200, Parity.None, 8, StopBits.One);
-            _serialPort.DataReceived += OnDataReceived;
-            _serialPort.ErrorReceived += OnErrorReceived;
-
-            _serialPort.Open();
+            var ports = SerialPort.GetPortNames();
+            if (!ports.Contains(devicePath))
+            {
+                _logger.LogError("Serial device {Device} not found. Available ports: {Ports}", devicePath, string.Join(", ", ports));
+                _serialPort = null;
+            }
+            else
+            {
+                _serialPort = new SerialPort(devicePath, 19200)
+                {
+                    DataBits = 8,
+                    Parity = Parity.None,
+                    StopBits = StopBits.One,
+                    Handshake = Handshake.None
+                };
+                _serialPort.DataReceived += OnDataReceived;
+                _serialPort.ErrorReceived += OnErrorReceived;
+                _serialPort.Open();
+            }
             _connected = true;
             
             _logger.LogInformation("Connected to RNet on {Device}", devicePath);

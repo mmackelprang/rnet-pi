@@ -23,7 +23,58 @@ public class Zone
 
     // Zone parameters: Bass, Treble, Loudness, Balance, TurnOnVolume, BackgroundColor, DoNotDisturb, PartyMode, FrontAVEnable
     private readonly object[] _parameters = new object[9];
+    public int Bass
+    {
+        get { return (int)_parameters[0]; }
+        set { _parameters[0] = value; }
+    }
 
+    public int Treble
+    {
+        get { return (int)_parameters[1]; }
+        set { _parameters[1] = value; }
+    }
+
+    public bool Loudness
+    {
+        get { return (bool)_parameters[2]; }
+        set { _parameters[2] = value; }
+    }
+    public int Balance
+    {
+        get { return (int)_parameters[3]; }
+        set { _parameters[3] = value; }
+    }
+    public int TurnOnVolume
+    {
+        get { return (int)_parameters[4]; }
+        set { _parameters[4] = value; }
+    }
+
+    public int BackgroundColor
+    {
+        get { return (int)_parameters[5]; }
+        set { _parameters[5] = value; }
+    }
+
+    public bool DoNotDisturb
+    {
+        get { return (bool)_parameters[6]; }
+        set { _parameters[6] = value; }
+    }
+
+    public int PartyMode
+    {
+        get { return (int)_parameters[7]; }
+        set { _parameters[7] = value; }
+    }
+
+    public bool FrontAVEnable
+    {
+        get { return (bool)_parameters[8]; }
+        set { _parameters[8] = value; }
+    }
+    
     // Events
     public event Action<string>? NameChanged;
     public event Action<bool, bool>? PowerChanged; // power, rNetTriggered
@@ -44,19 +95,6 @@ public class Zone
     {
     }
 
-    public enum Parameter
-    {
-        Bass = 0,
-        Treble = 1,
-        Loudness = 2,
-        Balance = 3,
-        TurnOnVolume = 4,
-        BackgroundColor = 5,
-        DoNotDisturb = 6,
-        PartyMode = 7,
-        FrontAVEnable = 8
-    }
-
     public Zone(int controllerID, int zoneID,
         Action<Zone, RNet.RequestDataPacket>? sendDataCallback = null,
         Action<Zone, RNet.RequestParameterPacket>? sendParameterCallback = null,
@@ -69,15 +107,15 @@ public class Zone
         _sendDisplayCallback = sendDisplayCallback;
         
         // Initialize parameters with default values
-        _parameters[(int)Parameter.Bass] = 0;      // Bass             -10 - +10
-        _parameters[(int)Parameter.Treble] = 0;      // Treble           -10 - +10
-        _parameters[(int)Parameter.Loudness] = false;  // Loudness
-        _parameters[(int)Parameter.Balance] = 0;      // Balance          -10 - +10
-        _parameters[(int)Parameter.TurnOnVolume] = 50;      // Turn on Volume   0 - 100
-        _parameters[(int)Parameter.BackgroundColor] = 0;      // Background Color 0 - 2
-        _parameters[(int)Parameter.DoNotDisturb] = false;  // Do Not Disturb
-        _parameters[(int)Parameter.PartyMode] = 0;      // Party Mode       0 - 2
-        _parameters[(int)Parameter.FrontAVEnable] = false;  // Front AV Enable
+        Bass = 0;              // Bass             -10 - +10
+        Treble = 0;            // Treble           -10 - +10
+        Loudness = false;      // Loudness
+        Balance = 0;           // Balance          -10 - +10
+        TurnOnVolume = 50;     // Turn on Volume   0 - 100
+        BackgroundColor = 0;   // Background Color 0 - 2
+        DoNotDisturb = false;  // Do Not Disturb
+        PartyMode = 0;         // Party Mode       0 - 2
+        FrontAVEnable = false; // Front AV Enable
     }
 
     public void SetName(string name)
