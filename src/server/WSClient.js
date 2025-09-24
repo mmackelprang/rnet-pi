@@ -1,4 +1,5 @@
 const Client = require("./Client");
+const MessageLogger = require("../MessageLogger");
 const createPacket = require("./packets/createPacket");
 const PacketC2S = require("./packets/PacketC2S");
 const PacketS2CZoneIndex = require("./packets/PacketS2CZoneIndex");
@@ -29,7 +30,7 @@ class WSClient extends Client {
     }
 
     send(packet) {
-        //console.info("DEBUG: Sending packet " + packet.constructor.name + " to " + this.getAddress());
+        MessageLogger.logNetwork('SENT', packet, this.getAddress());
         this._connection.sendBytes(packet.getBuffer());
     }
 

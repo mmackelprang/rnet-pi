@@ -1,5 +1,6 @@
 const EventEmitter = require("events");
 
+const MessageLogger = require("../MessageLogger");
 const TCPServer = require("./TCPServer");
 const WSServer = require("./WSServer");
 
@@ -54,6 +55,7 @@ class Server extends EventEmitter {
     }
 
     broadcast(packet) {
+        MessageLogger.logNetwork('SENT', packet, 'BROADCAST');
         const buffer = packet.getBuffer();
 
         this._tcpServer.broadcastBuffer(buffer);
