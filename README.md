@@ -7,6 +7,7 @@ Features
 - Front-end Android app -- Use your mobile phone or tablet to control your Russound system. ([Google Play](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote))
 - IFTTT support -- Allows the ability to automate your system using IFTT or utilize assistants such as Google Home or Alexa.
 - Volume limit -- Individually limit zones to a maximum volume.
+- Message Logging -- Comprehensive logging of all serial (RNet) and network messages for debugging and monitoring.
 - Chromecast Audio Integration
   - Display currently playing media on wall plate displays.
   - Control Chromecast using existing wall plates.
@@ -65,3 +66,31 @@ Installation
 `sudo systemctl start rnet-pi`
 ##### Setup the Zones and Sources
 The RNET RS-232 protocol has no zone naming, method of determining which zones and sources have physical connections, or method to retrieve the names of sources. All of that is up to you. Before you can start using this system, you must connect to this newly created server using the [RNET Remote](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote) app and add zones and sources.
+
+Message Logging
+---
+RNET-Pi includes comprehensive message logging to help with debugging and monitoring system activity. All serial communication with RNet hardware and network communication with client applications is logged with detailed information.
+
+### Logging Format
+- **Serial Messages**: `[SERIAL SENT/RECEIVED] PacketName - details [buffer_size bytes: hex_data]`
+- **Network Messages**: `[NETWORK SENT/RECEIVED] PacketName to/from client_address - details`
+
+### What Gets Logged
+- **Serial (RNet) Messages**:
+  - All outgoing commands sent to RNet hardware (zone control, source changes, etc.)
+  - All incoming responses from RNet hardware (status updates, zone information, etc.)
+  - Raw buffer data in hexadecimal format for low-level debugging
+- **Network Messages**:
+  - All messages sent to client applications (mobile apps, web interfaces)
+  - All commands received from client applications
+  - Broadcast messages sent to all connected clients
+  - Individual messages sent to specific clients
+
+### Example Log Output
+```
+[SERIAL SENT] SetVolumePacket - target: 0-1, source: 0-0 [12 bytes: f0000170000070...]
+[NETWORK RECEIVED] PacketC2SZoneVolume from 192.168.1.100 - ID: 0x09
+[NETWORK SENT] PacketS2CZoneVolume to BROADCAST - ID: 0x0F
+```
+
+Logs are written to the console and can be redirected to files using standard output redirection or logging services like systemd-journald when running as a service.
