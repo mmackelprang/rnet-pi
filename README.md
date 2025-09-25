@@ -4,6 +4,7 @@ Using the RS-232 "automation" port on older Russound whole home audio systems, w
 
 Features
 ---
+- Web Interface -- Built-in web UI for controlling zones directly from any web browser.
 - Front-end Android app -- Use your mobile phone or tablet to control your Russound system. ([Google Play](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote))
 - IFTTT support -- Allows the ability to automate your system using IFTT or utilize assistants such as Google Home or Alexa.
 - Volume limit -- Individually limit zones to a maximum volume.
@@ -17,7 +18,6 @@ Features
 ### Planned Features
  - Sonos Connect support.
  - Direct integration with Alexa and Google Home opposed to using IFTTT.
- - Web interface
 
 ### Supported Systems
 In theory, this *should* work with the CAS44, CAA66, CAM6.6, and CAV6.6, but has only been tested with the CAV6.6. If you run into any issues with other devices, feel free to open an issue. The more support, the better.
@@ -66,6 +66,47 @@ Installation
 `sudo systemctl start rnet-pi`
 ##### Setup the Zones and Sources
 The RNET RS-232 protocol has no zone naming, method of determining which zones and sources have physical connections, or method to retrieve the names of sources. All of that is up to you. Before you can start using this system, you must connect to this newly created server using the [RNET Remote](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote) app and add zones and sources.
+
+Web Interface
+---
+RNET-Pi includes a built-in web interface that provides a modern, responsive way to control your audio zones directly from any web browser.
+
+### Accessing the Web UI
+1. **Set a webhook password** in your `config.json` file:
+   ```json
+   {
+     "webHookPassword": "your_secure_password_here"
+   }
+   ```
+2. **Access the interface** by navigating to:
+   `http://your_pi_ip:3001/?pass=your_secure_password_here`
+   
+   Or simply visit `http://your_pi_ip:3001/` and enter the password when prompted.
+
+### Features
+- **Global Controls**: Turn all zones on/off or mute/unmute all zones simultaneously
+- **Zone Overview**: Visual cards showing each zone's status, volume, source, and power state
+- **Individual Zone Control**: Click "Controls" on any zone to access detailed settings:
+  - Power on/off toggle
+  - Mute/unmute toggle  
+  - Volume slider (0-100)
+  - Source selection dropdown
+  - Loudness toggle
+  - Bass adjustment (-10 to +10)
+  - Treble adjustment (-10 to +10)
+  - Turn-on volume setting (0-100)
+  - Maximum volume limit (0-100)
+  - Do Not Disturb toggle
+
+### Responsive Design
+The web interface is fully responsive and works on:
+- Desktop computers
+- Tablets  
+- Mobile phones
+- Any device with a modern web browser
+
+### Real-time Updates
+The interface automatically refreshes zone status every 5 seconds to keep information current across all connected devices.
 
 Docker Installation (Alternative)
 ---

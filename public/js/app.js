@@ -6,11 +6,23 @@ class RNetWebUI {
         this.password = new URLSearchParams(window.location.search).get('pass') || '';
         
         if (!this.password) {
-            alert('Please add ?pass=YOUR_PASSWORD to the URL');
+            this.showPasswordPrompt();
             return;
         }
         
         this.init();
+    }
+
+    showPasswordPrompt() {
+        const password = prompt('Please enter the webhook password:');
+        if (password) {
+            const url = new URL(window.location);
+            url.searchParams.set('pass', password);
+            window.location.href = url.toString();
+        } else {
+            document.getElementById('zones-container').innerHTML = 
+                '<div style="text-align: center; color: #666; margin: 2rem;">Password required to access RNet controller</div>';
+        }
     }
 
     init() {

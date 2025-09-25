@@ -102,7 +102,8 @@ class WebHookServer extends EventEmitter {
             res.sendStatus(200);
         });
 
-        this._app.use("/:zone/*", function(req, res, next) {
+        // Zone lookup middleware function
+        const findZone = function(req, res, next) {
             const zone = rNet.findZoneByName(req.params.zone);
             if (zone) {
                 req.zone = zone;
@@ -112,14 +113,14 @@ class WebHookServer extends EventEmitter {
                 console.warn("[Web Hook] Unknown zone " + req.params.zone + ".");
                 res.sendStatus(404);
             }
-        })
+        };
 
-        this._app.put("/:zone/volume/:volume", function(req, res) {
+        this._app.put("/:zone/volume/:volume", findZone, function(req, res) {
             req.zone.setVolume(Math.floor(parseInt(req.params.volume) / 2) * 2);
             res.sendStatus(200);
         });
 
-        this._app.put("/:zone/source/:source", function(req, res) {
+        this._app.put("/:zone/source/:source", findZone, function(req, res) {
             const source = rNet.findSourceByName(req.params.source);
             if (source !== false) {
                 req.zone.setSourceID(source.getSourceID());
@@ -130,27 +131,27 @@ class WebHookServer extends EventEmitter {
             }
         });
 
-        this._app.put("/:zone/mute", function(req, res) {
+        this._app.put("/:zone/mute", findZone, function(req, res) {
             req.zone.setMute(true, 1000);
             res.sendStatus(200);
         });
 
-        this._app.put("/:zone/unmute", function(req, res) {
+        this._app.put("/:zone/unmute", findZone, function(req, res) {
             req.zone.setMute(false, 1000);
             res.sendStatus(200);
         });
 
-        this._app.put("/:zone/on", function(req, res) {
+        this._app.put("/:zone/on", findZone, function(req, res) {
             req.zone.setPower(true);
             res.sendStatus(200);
         });
 
-        this._app.put("/:zone/off", function(req, res) {
+        this._app.put("/:zone/off", findZone, function(req, res) {
             req.zone.setPower(false);
             res.sendStatus(200);
         });
 
-        this._app.put("/:zone/parameter/:paramId/:value", function(req, res) {
+        this._app.put("/:zone/parameter/:paramId/:value", findZone, function(req, res) {
             const paramId = parseInt(req.params.paramId);
             let value = req.params.value;
             
@@ -166,7 +167,7 @@ class WebHookServer extends EventEmitter {
             }
         });
 
-        this._app.put("/:zone/maxvolume/:volume", function(req, res) {
+        this._app.put("/:zone/maxvolume/:volume", findZone, function(req, res) {
             const volume = parseInt(req.params.volume);
             if (volume >= 0 && volume <= 100) {
                 req.zone.setMaxVolume(volume);
