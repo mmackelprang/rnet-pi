@@ -84,6 +84,10 @@ EventPacket.fromPacket = function(rNetPacket) {
         const eventPacket = new EventPacket();
         rNetPacket.copyToPacket(eventPacket);
 
+        if (!Buffer.isBuffer(rNetPacket.messageBody)) {
+            throw new Error("EventPacket.fromPacket: messageBody is not a valid Buffer");
+        }
+
         const buffer = SmartBuffer.fromBuffer(rNetPacket.messageBody);
         eventPacket.targetPath = [];
         {

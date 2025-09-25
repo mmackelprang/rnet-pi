@@ -20,6 +20,11 @@ HandshakePacket.fromPacket = function(rNetPacket) {
     if (rNetPacket instanceof RNetPacket) {
         const handshakePacket = new HandshakePacket();
         rNetPacket.copyToPacket(handshakePacket);
+        
+        if (!Buffer.isBuffer(rNetPacket.messageBody)) {
+            throw new Error("HandshakePacket.fromPacket: messageBody is not a valid Buffer");
+        }
+        
         handshakePacket._handshakeType = rNetPacket.messageBody.readUInt8(0);
         return handshakePacket;
     }
