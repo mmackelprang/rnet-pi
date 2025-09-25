@@ -159,3 +159,48 @@ RNET-Pi includes comprehensive message logging to help with debugging and monito
 ```
 
 Logs are written to the console and can be redirected to files using standard output redirection or logging services like systemd-journald when running as a service.
+
+Bonjour/mDNS Service Discovery Debugging
+---
+If you're having trouble with Android apps discovering the RNet-Pi service automatically, use the included debug tool:
+
+### Quick Debug
+```bash
+# Test both service publishing and discovery
+node debug_bonjour.js both
+
+# Only test service publishing
+node debug_bonjour.js publish
+
+# Only test service discovery
+node debug_bonjour.js discover
+```
+
+### Debug Environment Variables
+```bash
+# Enable verbose Bonjour logging in the main application
+BONJOUR_DEBUG=true npm run dev
+
+# Test with different service configurations
+SERVICE_NAME="My-RNet-Controller" SERVICE_TYPE="http" node debug_bonjour.js
+```
+
+### Android Compatibility Issues
+The default service uses type `_rnet._tcp` which may not be discovered by all Android applications. If you're experiencing issues:
+
+1. **Test Discovery**: Use an Android mDNS browser app from the Play Store to verify the service is visible
+2. **Network Check**: Ensure your Android device is on the same WiFi network as the RNet-Pi
+3. **Service Type**: Consider changing the service type in `src/server/TCPServer.js` to:
+   - `_http._tcp` for web-based discovery
+   - `_homekit._tcp` for IoT/smart home compatibility
+   - `_tcp._local` for generic TCP services
+
+4. **Service Name**: Avoid spaces and special characters in service names for better Android compatibility
+
+### Bonjour Service Logs
+When running RNet-Pi, look for `[BONJOUR]` prefixed messages in the logs:
+```
+[BONJOUR] Publishing service: My Controller - type: rnet - port: 3000
+[BONJOUR] Service "My Controller" is now advertised on the network
+[BONJOUR] Service published successfully
+```
