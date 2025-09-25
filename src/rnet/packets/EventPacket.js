@@ -84,7 +84,7 @@ EventPacket.fromPacket = function(rNetPacket) {
         const eventPacket = new EventPacket();
         rNetPacket.copyToPacket(eventPacket);
 
-        const buffer = new SmartBuffer(rNetPacket.messageBody);
+        const buffer = SmartBuffer.fromBuffer(rNetPacket.messageBody);
         eventPacket.targetPath = [];
         {
             let length = buffer.readUInt8();
