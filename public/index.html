@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNet Audio Controller</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RNet Audio Controller</h1>
+            <div class="global-controls">
+                <button id="allOn" class="btn btn-primary">All On</button>
+                <button id="allOff" class="btn btn-secondary">All Off</button>
+                <button id="allMute" class="btn btn-warning">All Mute</button>
+                <button id="allUnmute" class="btn btn-success">All Unmute</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="connection-status" class="status-bar">
+                <span id="status-text">Connecting...</span>
+            </div>
+            
+            <div id="zones-container" class="zones-grid">
+                <!-- Zones will be populated dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Zone Control Modal -->
+    <div id="zoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Zone Control</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label>Power:</label>
+                    <button id="zonePowerOn" class="btn btn-primary">On</button>
+                    <button id="zonePowerOff" class="btn btn-secondary">Off</button>
+                </div>
+
+                <div class="control-group">
+                    <label>Mute:</label>
+                    <button id="zoneMute" class="btn btn-warning">Mute</button>
+                    <button id="zoneUnmute" class="btn btn-success">Unmute</button>
+                </div>
+
+                <div class="control-group">
+                    <label for="volumeSlider">Volume: <span id="volumeValue">50</span></label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50" class="slider">
+                </div>
+
+                <div class="control-group">
+                    <label for="sourceSelect">Source:</label>
+                    <select id="sourceSelect" class="form-control">
+                        <!-- Sources will be populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Loudness:</label>
+                    <button id="loudnessToggle" class="btn btn-info">Toggle</button>
+                </div>
+
+                <div class="control-group">
+                    <label for="bassSlider">Bass: <span id="bassValue">0</span></label>
+                    <input type="range" id="bassSlider" min="-10" max="10" value="0" class="slider">
+                </div>
+
+                <div class="control-group">
+                    <label for="trebleSlider">Treble: <span id="trebleValue">0</span></label>
+                    <input type="range" id="trebleSlider" min="-10" max="10" value="0" class="slider">
+                </div>
+
+                <div class="control-group">
+                    <label for="turnOnVolumeSlider">Turn On Volume: <span id="turnOnVolumeValue">0</span></label>
+                    <input type="range" id="turnOnVolumeSlider" min="0" max="100" value="0" class="slider">
+                </div>
+
+                <div class="control-group">
+                    <label for="maxVolumeSlider">Max Volume: <span id="maxVolumeValue">100</span></label>
+                    <input type="range" id="maxVolumeSlider" min="0" max="100" value="100" class="slider">
+                </div>
+
+                <div class="control-group">
+                    <label>Do Not Disturb:</label>
+                    <button id="dndToggle" class="btn btn-info">Toggle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
