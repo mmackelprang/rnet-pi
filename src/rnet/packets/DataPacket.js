@@ -69,6 +69,10 @@ DataPacket.fromPacket = function(rNetPacket) {
         const dataPacket = new DataPacket();
         rNetPacket.copyToPacket(dataPacket);
 
+        if (!Buffer.isBuffer(rNetPacket.messageBody)) {
+            throw new Error("DataPacket.fromPacket: messageBody is not a valid Buffer");
+        }
+
         const buffer = SmartBuffer.fromBuffer(rNetPacket.messageBody);
         dataPacket.targetPath = [];
         {

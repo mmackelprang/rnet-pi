@@ -33,6 +33,10 @@ RenderedDisplayMessagePacket.fromPacket = function(rNetPacket) {
         const rdmPacket = new RenderedDisplayMessagePacket();
         rNetPacket.copyToPacket(rdmPacket);
 
+        if (!Buffer.isBuffer(rNetPacket.messageBody)) {
+            throw new Error("RenderedDisplayMessagePacket.fromPacket: messageBody is not a valid Buffer");
+        }
+
         const buffer = SmartBuffer.fromBuffer(rNetPacket.messageBody);
 
         rdmPacket.valueLow = buffer.readUInt8();
