@@ -33,7 +33,7 @@ RenderedDisplayMessagePacket.fromPacket = function(rNetPacket) {
         const rdmPacket = new RenderedDisplayMessagePacket();
         rNetPacket.copyToPacket(rdmPacket);
 
-        const buffer = new SmartBuffer(rNetPacket.messageBody);
+        const buffer = SmartBuffer.fromBuffer(rNetPacket.messageBody);
 
         rdmPacket.valueLow = buffer.readUInt8();
         rdmPacket.valueHigh = buffer.readUInt8();
