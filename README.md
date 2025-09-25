@@ -67,6 +67,71 @@ Installation
 ##### Setup the Zones and Sources
 The RNET RS-232 protocol has no zone naming, method of determining which zones and sources have physical connections, or method to retrieve the names of sources. All of that is up to you. Before you can start using this system, you must connect to this newly created server using the [RNET Remote](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote) app and add zones and sources.
 
+Docker Installation (Alternative)
+---
+RNET-Pi now supports containerized deployment using Docker, which provides easier installation and better isolation.
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) installed on your system
+- USB-to-RS232 adapter connected to your Russound system
+
+### Quick Start with Docker Compose
+1. Clone the repository:
+   ```bash
+   git clone https://gitlab.com/zachcheatham/rnet-pi.git
+   cd rnet-pi
+   ```
+
+2. Update device path in `docker-compose.yml` if needed:
+   ```yaml
+   devices:
+     - "/dev/ttyUSB0:/dev/ttyUSB0"  # Adjust this path as needed
+   ```
+
+3. Start the container:
+   ```bash
+   docker-compose up -d
+   ```
+
+### Manual Docker Build and Run
+1. Build the Docker image:
+   ```bash
+   docker build -t rnet-pi .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -d \
+     --name rnet-pi \
+     -p 3000:3000 \
+     --device=/dev/ttyUSB0:/dev/ttyUSB0 \
+     -v $(pwd)/config.json:/app/config.json \
+     -v $(pwd)/sources.json:/app/sources.json \
+     -v $(pwd)/zones.json:/app/zones.json \
+     rnet-pi
+   ```
+
+### Docker Configuration Notes
+- The container runs on Node.js 18 (LTS) for maximum compatibility
+- Configuration files are mounted as volumes for persistence
+- The container uses `--device` to access the USB serial adapter  
+- Network mode is set to `host` for mDNS/Bonjour service discovery
+- Health checks are included to monitor container status
+- The application starts automatically when the container starts
+
+### Finding Your Serial Device
+To find the correct device path for your USB-to-RS232 adapter:
+```bash
+# Before plugging in the adapter
+ls /dev/tty*
+
+# After plugging in the adapter  
+ls /dev/tty*
+
+# Compare the output - the new device is your adapter
+# Common paths: /dev/ttyUSB0, /dev/ttyACM0, /dev/tty-usbserial1
+```
+
 Message Logging
 ---
 RNET-Pi includes comprehensive message logging to help with debugging and monitoring system activity. All serial communication with RNet hardware and network communication with client applications is logged with detailed information.

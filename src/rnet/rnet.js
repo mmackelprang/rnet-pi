@@ -1,6 +1,6 @@
 const EventEmitter = require("events");
 const fs = require("fs");
-const SerialPort = require("serialport");
+const { SerialPort } = require("serialport");
 const SmartBuffer = require("smart-buffer").SmartBuffer;
 
 const ExtraZoneParam = require("./extraZoneParam");
@@ -44,7 +44,8 @@ class RNet extends EventEmitter {
     connect() {
         // TODO Automatically continue to try to connect
         // TODO This autodetect usb serial
-        this._serialPort = new SerialPort(this._device, {
+        this._serialPort = new SerialPort({
+            path: this._device,
             baudRate: 19200,
         })
         .on("open", () => {
