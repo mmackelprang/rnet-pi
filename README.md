@@ -33,15 +33,17 @@ Installation
 `sudo apt update && sudo apt upgrade`
 2. Install [Node.JS](https://nodejs.org/en/):
 `sudo apt install nodejs`
-3. Install [forever-service](https://github.com/zapty/forever-service) in order to have RNET Pi run automatically at boot:
-`sudo npm install -g forever-service`
+3. Install [PM2](https://pm2.keymetrics.io/) in order to have RNET Pi run automatically at boot:
+`sudo npm install -g pm2`
 4. Download RNET Pi:
 `git clone https://gitlab.com/zachcheatham/rnet-pi.git`
 `cd rnet-pi`
 5. Download and install required libraries:
 `npm install`
 6. Install RNET Pi to a service for autostarting at boot:
-`sudo forever-service install -s ./src/app.js rnet-pi`
+`npm run start`
+`pm2 startup`
+`pm2 save`
 ##### Configuration
 1. Run the server once to generate a config file
 `npm start` *Wait for startup to complete* `^C`

@@ -7,7 +7,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "forever start src/app.js",
+    "start": "pm2 start src/app.js --name rnet-pi",
+    "stop": "pm2 stop rnet-pi",
+    "restart": "pm2 restart rnet-pi",
     "dev": "node src/app.js",
     "docker:build": "docker build -t rnet-pi .",
     "docker:run": "docker run -p 3000:3000 --device=/dev/ttyUSB0:/dev/ttyUSB0 rnet-pi"
@@ -20,8 +22,8 @@
     "castv2-client": "^1.2.0",
     "console-stamp": "^3.1.2",
     "express": "^5.0.1",
-    "forever": "^4.0.3",
-    "serialport": "^12.0.0",
+    "pm2": "^6.0.13",
+    "serialport": "^11.0.1",
     "smart-buffer": "^4.2.0",
     "websocket": "^1.0.35"
   }
