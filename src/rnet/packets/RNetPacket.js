@@ -50,7 +50,7 @@ class RNetPacket {
         const totalBytes = buffer.length;
         var byteSum = 0;
 
-        buffer.moveTo(0);
+        buffer.readOffset = 0;
         for (var i = 0; i < totalBytes; i++) {
             byteSum += buffer.readUInt8();
         }
