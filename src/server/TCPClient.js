@@ -1,6 +1,7 @@
 const SmartBuffer = require("smart-buffer").SmartBuffer;
 
 const Client = require("./Client");
+const MessageLogger = require("../MessageLogger");
 const createPacket = require("./packets/createPacket");
 const PacketC2S = require("./packets/PacketC2S");
 const PacketC2SIntent = require("./packets/PacketC2SIntent");
@@ -29,7 +30,7 @@ class TCPClient extends Client {
     }
 
     send(packet) {
-        //console.info("DEBUG: Sending packet " + packet.constructor.name + " to " + this.getAddress());
+        MessageLogger.logNetwork('SENT', packet, this.getAddress());
         this._connection.write(packet.getBuffer());
     }
 

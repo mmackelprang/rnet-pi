@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  rnet-pi:
+    build: .
+    container_name: rnet-pi
+    ports:
+      - "3000:3000"
+    devices:
+      # Map the USB serial device to container
+      # Adjust the device path as needed for your system
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    volumes:
+      # Mount config files for persistence
+      - "./config.json:/app/config.json"
+      - "./sources.json:/app/sources.json" 
+      - "./zones.json:/app/zones.json"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # Add privileged mode if needed for serial access
+    # privileged: true
+    
+    # Alternative: use specific capabilities instead of privileged
+    cap_add:
+      - SYS_ADMIN
+    
+    # Network mode for mDNS/Bonjour service discovery
+    network_mode: "host"
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

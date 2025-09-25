@@ -1,5 +1,7 @@
 const EventEmitter = require("events");
 
+const MessageLogger = require("../MessageLogger");
+
 
 const createPacket = require("./packets/createPacket");
 const PacketC2S = require("./packets/PacketC2S");
@@ -41,9 +43,7 @@ class Client extends EventEmitter {
         const packet = createPacket(packetType, data);
 
         if (packet !== undefined) {
-            console.info("DEBUG: Recieved packet " + packet.constructor.name + " from " + this.getAddress());
-
-            
+            MessageLogger.logNetwork('RECEIVED', packet, this.getAddress());
 
             if (packet.getID() == PacketC2SIntent.ID) {
                 this._intent = packet.getIntent();

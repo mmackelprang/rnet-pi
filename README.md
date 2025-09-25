@@ -7,6 +7,7 @@ Features
 - Front-end Android app -- Use your mobile phone or tablet to control your Russound system. ([Google Play](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote))
 - IFTTT support -- Allows the ability to automate your system using IFTT or utilize assistants such as Google Home or Alexa.
 - Volume limit -- Individually limit zones to a maximum volume.
+- Message Logging -- Comprehensive logging of all serial (RNet) and network messages for debugging and monitoring.
 - Chromecast Audio Integration
   - Display currently playing media on wall plate displays.
   - Control Chromecast using existing wall plates.
@@ -65,3 +66,96 @@ Installation
 `sudo systemctl start rnet-pi`
 ##### Setup the Zones and Sources
 The RNET RS-232 protocol has no zone naming, method of determining which zones and sources have physical connections, or method to retrieve the names of sources. All of that is up to you. Before you can start using this system, you must connect to this newly created server using the [RNET Remote](https://play.google.com/store/apps/details?id=me.zachcheatham.rnetremote) app and add zones and sources.
+
+Docker Installation (Alternative)
+---
+RNET-Pi now supports containerized deployment using Docker, which provides easier installation and better isolation.
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) installed on your system
+- USB-to-RS232 adapter connected to your Russound system
+
+### Quick Start with Docker Compose
+1. Clone the repository:
+   ```bash
+   git clone https://gitlab.com/zachcheatham/rnet-pi.git
+   cd rnet-pi
+   ```
+
+2. Update device path in `docker-compose.yml` if needed:
+   ```yaml
+   devices:
+     - "/dev/ttyUSB0:/dev/ttyUSB0"  # Adjust this path as needed
+   ```
+
+3. Start the container:
+   ```bash
+   docker-compose up -d
+   ```
+
+### Manual Docker Build and Run
+1. Build the Docker image:
+   ```bash
+   docker build -t rnet-pi .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -d \
+     --name rnet-pi \
+     -p 3000:3000 \
+     --device=/dev/ttyUSB0:/dev/ttyUSB0 \
+     -v $(pwd)/config.json:/app/config.json \
+     -v $(pwd)/sources.json:/app/sources.json \
+     -v $(pwd)/zones.json:/app/zones.json \
+     rnet-pi
+   ```
+
+### Docker Configuration Notes
+- The container runs on Node.js 18 (LTS) for maximum compatibility
+- Configuration files are mounted as volumes for persistence
+- The container uses `--device` to access the USB serial adapter  
+- Network mode is set to `host` for mDNS/Bonjour service discovery
+- Health checks are included to monitor container status
+- The application starts automatically when the container starts
+
+### Finding Your Serial Device
+To find the correct device path for your USB-to-RS232 adapter:
+```bash
+# Before plugging in the adapter
+ls /dev/tty*
+
+# After plugging in the adapter  
+ls /dev/tty*
+
+# Compare the output - the new device is your adapter
+# Common paths: /dev/ttyUSB0, /dev/ttyACM0, /dev/tty-usbserial1
+```
+
+Message Logging
+---
+RNET-Pi includes comprehensive message logging to help with debugging and monitoring system activity. All serial communication with RNet hardware and network communication with client applications is logged with detailed information.
+
+### Logging Format
+- **Serial Messages**: `[SERIAL SENT/RECEIVED] PacketName - details [buffer_size bytes: hex_data]`
+- **Network Messages**: `[NETWORK SENT/RECEIVED] PacketName to/from client_address - details`
+
+### What Gets Logged
+- **Serial (RNet) Messages**:
+  - All outgoing commands sent to RNet hardware (zone control, source changes, etc.)
+  - All incoming responses from RNet hardware (status updates, zone information, etc.)
+  - Raw buffer data in hexadecimal format for low-level debugging
+- **Network Messages**:
+  - All messages sent to client applications (mobile apps, web interfaces)
+  - All commands received from client applications
+  - Broadcast messages sent to all connected clients
+  - Individual messages sent to specific clients
+
+### Example Log Output
+```
+[SERIAL SENT] SetVolumePacket - target: 0-1, source: 0-0 [12 bytes: f0000170000070...]
+[NETWORK RECEIVED] PacketC2SZoneVolume from 192.168.1.100 - ID: 0x09
+[NETWORK SENT] PacketS2CZoneVolume to BROADCAST - ID: 0x0F
+```
+
+Logs are written to the console and can be redirected to files using standard output redirection or logging services like systemd-journald when running as a service.
